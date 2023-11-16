@@ -10,4 +10,4 @@ CONFIG_LOC="$ROOT_DIR"
 # Uncomment the line below to include configuration file
 # "$DOSBOX_BIN" -conf "$CONFIG_LOC"
 
-"$DOSBOX_BIN" -c "MOUNT c $BIN_DIR"
+"$DOSBOX_BIN" -c "MOUNT c $BIN_DIR" -c "C:" -c "keyb fr"
