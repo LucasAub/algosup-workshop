@@ -1,38 +1,61 @@
-; =============================================================================
-;
-; x86/DOS Assembly Keyboard buffer example.
-;
-; =============================================================================
+;print a sprite 8 x 8 bytes on the screen
+
 org 100h
 
-; -----------------------------------------------
-; We declare some initialized data.
 section .data
-    charDump db `Entered character: '`
-    charValue db 'X'
-    charDumpTail db `'\r\n$`
 
-; -----------------------------------------------
-; This section host code.
+sprite db 0x10, 0x9F, 0x0F, 0x5A, 0xBB, 0x64, 0x38, 0x01
+       db 0x00, 0xFF, 0x0F, 0xAA, 0xBB, 0x64, 0x88, 0x11
+       db 0x00, 0xFF, 0x0F, 0xAA, 0xBB, 0x64, 0x88, 0x11
+       db 0x00, 0xFF, 0x0F, 0xAA, 0xBB, 0x64, 0x88, 0x11
+       db 0x00, 0xFF, 0x0F, 0xAA, 0xBB, 0x64, 0x88, 0x11
+       db 0x00, 0xFF, 0x0F, 0xAA, 0xBB, 0x64, 0x88, 0x11
+       db 0x00, 0xFF, 0x0F, 0xAA, 0xBB, 0x64, 0x88, 0x11
+       db 0x00, 0xFF, 0x0F, 0xAA, 0xBB, 0x64, 0x88, 0x11
+
 section .text
-readKeyboard:
-    ; Read next key in buffer:
-    xor ax, ax
-    int 16h
 
-    ; Overwrite the first char in 'charDump' with received char:
-    mov [charValue] ,al
+mov ah, 00h ; set video mode requirement
+mov al, 13h ; set video mode option o 320 x 200 256 colors
+int 10h
 
-    ; Print the loaded char:
-    mov ah, 9
-    mov dx, charDump
-    int 21h
+mov al, 0FFh
+call clearScreen
+call printSprite
 
-    ; Compare the red char with ESCAPE (ASCII #27)
-    cmp byte [charValue] ,27
-    jne readKeyboard        ; Loop while not "escape".
 
-    ; Exit the program
-    mov ah, 4Ch
-    xor al, al
-    int 21h
+
+;reset the keyboard buffer and then wait for a keypress :
+mov ax, 0C01h ; 
+int 21h
+
+;dos box default video mode
+mov ax, 03h 
+int 21h
+
+int 20h ;quit
+
+the_functions:
+
+; need to set the color of filling in al
+clearScreen:
+mov ax, 0xA000
+mov es, ax
+mov di, 0
+mov cx, 200*320
+rep stosb
+ret 
+
+printSprite:
+mov ax, 0xA000
+mov es, ax
+mov di, 0
+mov si, sprite
+mov dx, 8
+       eachLine:
+       mov cx, 8
+       rep movsb
+       add di, 320-8
+       dec dx
+       jnz eachLine
+ret
